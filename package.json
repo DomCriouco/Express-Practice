@@ -4,15 +4,18 @@
   "description": "practice on express",
   "main": "index.js",
   "scripts": {
-    "lint": "eslint .",
+    "lint": "eslint src/*.ts models/*.ts",
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "node dist/src/index.js",
+    "compute": "tsc && node dist/src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Enzo Soares",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.3"
+    "body-parser": "^1.19.2",
+    "express": "^4.17.3",
+    "mongoose": "^6.2.6"
   },
   "devDependencies": {
     "@types/express": "^4.17.13",
