@@ -1,7 +1,8 @@
 import {Request, Response} from 'express';
 import {connect} from 'mongoose';
 import {urlencoded, json} from 'body-parser';
-import Book from '../models/bookmodel';
+import BookModel from '../models/bookmodel';
+import {bookInterface, bookSearch} from './interfaces/bookinterface';
 
 const express = require('express');
 const app = express();
@@ -15,15 +16,45 @@ app.use(json());
 const bookRouter = new express.Router();
 
 bookRouter.route('/books')
-    .get((req:Request, res:Response) => {
-      const response = {hello: 'this is my book API'};
-      res.json(response);
-    })
     .post((req:Request, res:Response) => {
-      const book = new Book(req.body);
+      const book = new BookModel(req.body);
 
-      console.log(book);
-      return res.json(book);
+      try {
+        book.save();
+        return res.json(book);
+      } catch (err) {
+        return res.json(err);
+      }
+    })
+    .get((req:Request, res:Response) => {
+      const myQuery: bookSearch = {};
+
+      if (req.query.author) {
+        myQuery.author = String(req.query.author);
+      }
+      if (req.query.genre) {
+        myQuery.genre = String(req.query.genre);
+      }
+      if (req.query.read) {
+        myQuery.read = Boolean(req.query.read);
+      }
+
+      BookModel.find(myQuery, (err, books) => {
+        if (err) {
+          return res.send(err);
+        }
+        return res.json(books);
+      });
+    });
+
+bookRouter.route('/books/:bookId')
+    .get((req:Request, res:Response) => {
+      BookModel.findById(req.params.bookId, (err: Error, book: bookInterface)=>{
+        if (err) {
+          return res.send(err);
+        }
+        res.json(book);
+      });
     });
 
 app.use('/api', bookRouter);
