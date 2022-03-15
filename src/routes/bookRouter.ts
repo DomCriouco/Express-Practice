@@ -60,19 +60,41 @@ const routes = (bookModel: typeof BookModel) => {
   });
 
   bookRouter.route('/books/:bookId')
-      .get((req:bookRequest, res:Response) => {
-        res.json(req.book);
-      })
+      .get((req:bookRequest, res:Response) => res.json(req.book))
       .put((req:bookRequest, res:Response) => {
-        req.book.title = req.body.title;
-        req.book.author = req.body.author;
-        req.book.genre = req.body.genre;
-        req.book.read = req.body.read;
+        const {book} = req;
+        book.title = req.body.title;
+        book.author = req.body.author;
+        book.genre = req.body.genre;
+        book.read = req.body.read;
 
         const modifiedBook = new BookModel(req.book);
         modifiedBook.save();
 
         return res.json(modifiedBook);
+      })
+      .patch((req:bookRequest, res:Response) => {
+        const modifiedBook = new BookModel(req.book);
+        if (req.body.title) {
+          modifiedBook.title = req.body.title;
+        }
+        if (req.body.author) {
+          modifiedBook.author = req.body.author;
+        }
+        if (req.body.genre) {
+          modifiedBook.genre = req.body.genre;
+        }
+        if (req.body.read) {
+          modifiedBook.read = req.body.read;
+        }
+
+        modifiedBook.save();
+        return res.json(modifiedBook);
+      })
+      .delete((req:bookRequest, res:Response) => {
+        const bookToDelete = new BookModel(req.book);
+        bookToDelete.delete();
+        return res.sendStatus(204);
       });
 
   return bookRouter;
