@@ -1,6 +1,9 @@
-import {bookInterface, bookSearch} from '../interfaces/bookinterface';
+import {
+  bookInterface,
+  bookRequest,
+  bookSearch
+} from '../interfaces/bookinterface';
 import {Request, Response, Router} from 'express';
-import {model} from 'mongoose';
 import BookModel from '../../models/bookmodel';
 
 const express = require('express');
@@ -40,33 +43,36 @@ const routes = (bookModel: typeof BookModel) => {
         });
       });
 
+  bookRouter.use('/books/:bookId', (req:bookRequest, res:Response, next) => {
+    bookModel.findById(req.params.bookId,
+        (err: Error, book: bookInterface)=>{
+          if (err) {
+            return res.send(err);
+          }
+
+          if (book) {
+            req.book = book;
+            return next();
+          }
+
+          return res.sendStatus(404);
+        });
+  });
+
   bookRouter.route('/books/:bookId')
-      .get((req:Request, res:Response) => {
-        bookModel.findById(req.params.bookId,
-            (err: Error, book: bookInterface)=>{
-              if (err) {
-                return res.send(err);
-              }
-              res.json(book);
-            });
+      .get((req:bookRequest, res:Response) => {
+        res.json(req.book);
       })
-      .put((req:Request, res:Response) => {
-        bookModel.findById(req.params.bookId,
-            (err: Error, book: bookInterface)=>{
-              if (err) {
-                return res.send(err);
-              }
+      .put((req:bookRequest, res:Response) => {
+        req.book.title = req.body.title;
+        req.book.author = req.body.author;
+        req.book.genre = req.body.genre;
+        req.book.read = req.body.read;
 
-              book.title = req.body.title;
-              book.author = req.body.author;
-              book.genre = req.body.genre;
-              book.read = req.body.read;
+        const modifiedBook = new BookModel(req.book);
+        modifiedBook.save();
 
-              const modifiedBook = new BookModel(book);
-              modifiedBook.save();
-
-              return res.json(book);
-            });
+        return res.json(modifiedBook);
       });
 
   return bookRouter;

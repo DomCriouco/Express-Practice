@@ -1,3 +1,5 @@
+import {Request} from 'express';
+
 export interface bookSearch {
   author?: string,
   genre?: string,
@@ -10,4 +12,8 @@ export interface bookInterface {
   author: string,
   genre: string,
   read: boolean
+}
+
+export interface bookRequest extends Request {
+  book?: bookInterface,
 }
